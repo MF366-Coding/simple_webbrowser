@@ -1,0 +1,22 @@
+[build-system]
+requires = ["webbrowser", "sys"]
+build-backend = "simple_webbrowser.build"
+
+[project]
+name = "simple_webbrowser"
+version = "0.0.1"
+authors = [
+  { name="MF366", email="real_mf366@yahoo.com" },
+]
+description = "A simple Python module that allows for a more simple webbrowser and script connection, based on standard webbrowser module."
+readme = "README.md"
+requires-python = ">=3.10"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/MF366-Coding/simple_webbrowser"
+"Bug Tracker" = "https://github.com/MF366-Coding/simple_webbrowser/issues"
