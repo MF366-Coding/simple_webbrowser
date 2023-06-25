@@ -3,3 +3,8 @@
 
 # License
 This module is licensed under the MIT License.
+
+# PyPI
+This module is not available on PyPI.
+
+Instead, it's here, on GitHub... 
