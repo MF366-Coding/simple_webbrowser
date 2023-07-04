@@ -5,6 +5,18 @@
 This module is licensed under the MIT License.
 
 # PyPI
-This module is not available on PyPI.
+This module is also available on PyPI.
 
-Instead, it's here, on GitHub... 
+# How to install?
+Use the following command on the commandline:
+```
+pip install simple_webbrowser
+```
+
+# How to use?
+Import it like this:
+```
+from simple_webbrowser import simple_webbrowser
+
+# Afterwards, just use it :)
+```
