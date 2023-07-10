@@ -5,12 +5,12 @@ from sys import platform
 # Based on built-in module: webbrowser
 # Also uses the platform variable from sys module
 
-def Website(url):
+def Website(url, new: int = 0):
     if platform == "win32":
-        webbrowser.open(url)
+        webbrowser.open(url, new=new)
         # trust me: this part is not a total waste
     elif platform == "linux" or "darwin":
-        webbrowser.open(url)
+        webbrowser.open(url, new=new)
         
 def Google(query):
     query = str(query)
@@ -83,3 +83,17 @@ def SpotifyOnline(query):
     for i in query:
         typed = query.replace(' ', '%20')
     webbrowser.open("https://open.spotify.com/search/"+typed)
+    
+def GitLab(query):
+    # requires a GitLab account
+    query = str(query)
+    for i in query:
+        typed = query.replace(' ', '%20')
+    webbrowser.open("https://gitlab.com/search?search="+typed)
+    
+def GitHub(query):
+    # requires a GitHub account
+    query = str(query)
+    for i in query:
+        typed = query.replace(' ', '+')
+    webbrowser.open("https://github.com/search?q="+typed)
