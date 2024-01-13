@@ -1,10 +1,10 @@
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling", "pytube", "colorama"]
 build-backend = "hatchling.build"
 
 [project]
 name = "simple_webbrowser"
-version = "0.0.6"
+version = "0.0.7"
 authors = [
   { name="MF366", email="real_mf366@yahoo.com" },
 ]

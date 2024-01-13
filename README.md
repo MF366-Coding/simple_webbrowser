@@ -35,6 +35,9 @@ except:
 	swb.Google("empty :(")
 ```
 
+## YouTube Downloader
+This project also comes with a YT Downloader that can be used as a script.
+
 # Projects where this module is used... (GitHub)
 Search query: [simple_webbrowser language:Python](https://github.com/search?q=simple_webbrowser+language%3APython&type=code)
 
