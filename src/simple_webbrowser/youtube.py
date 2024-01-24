@@ -1,12 +1,17 @@
 from pytube import YouTube, Playlist
-from argparse import ArgumentParser, Namespace
 from colorama import Fore as fg
+from typing import Literal, Any
 
-# [*] Change 1: Update the timeout to a smaller one
-
-# [!?] In case you have doubts, please use the '-h' flag.
-# [!!] PLEASE NEVER USE THIS WITH MALICIOUS INTENTS
+# [!] PLEASE NEVER USE THIS WITH MALICIOUS INTENTS
 # [i] This was only made for educational purposes!
+
+__outputs: bool = True
+
+def __print(*values: object, sep_end: tuple[str, None] = (" ", "\n"), file: Any = None, flush: Literal[False] = False) -> tuple[object] | None:
+    if __outputs:
+        return print(*values, sep=sep_end[0], end=sep_end[1], file=file, flush=flush)
+        
+    return values
 
 def clamp(value, _min, _max):
     if value > _max:
@@ -17,9 +22,9 @@ def clamp(value, _min, _max):
     
     return value
 
-parser: ArgumentParser = ArgumentParser("YT Downloader by MF366", None, "Download YouTube videos or audios.")
-
 def download_video(**kwargs):
+    global __outputs
+    
     link: str = kwargs["link"]
     filename: str | None = kwargs["filename"]
     audio_only: bool = kwargs["audio_only"]
@@ -28,6 +33,8 @@ def download_video(**kwargs):
     sv_desc: bool = kwargs["save_description"]
     is_playlist: bool = kwargs["playlist"]
     extra_timeout: int = kwargs["extra_timeout"]
+    
+    __outputs = kwargs["disable_output"]
     
     ytStreams: YouTube | Playlist | None = None
     
@@ -64,7 +71,7 @@ def download_video(**kwargs):
                     df.close()
                     
             except Exception as e:
-                print(f"{fg.RED}[X] An error has occurred while atempting to write the YouTube data to a new file!\n{fg.YELLOW}Remember that filenames cannot contain certain characters!\n{fg.RESET}{e}")
+                __print(f"{fg.RED}[X] An error has occurred while atempting to write the YouTube data to a new file!\n{fg.YELLOW}Remember that filenames cannot contain certain characters!\n{fg.RESET}{e}")
         
         if audio_only:
             youtubeDownload = ytStreams.streams.get_audio_only(audio_subtype)
@@ -85,10 +92,10 @@ def download_video(**kwargs):
             youtubeDownload.download(filename=filename, timeout=int(ytStreams.length / 10) + clamp(extra_timeout, 0, ytStreams.length * 3))
             
         except Exception as e:
-            print(f"{fg.RED}[X] An error has occurred!\n{fg.RESET}{e}")
+            __print(f"{fg.RED}[X] An error has occurred!\n{fg.RESET}{e}")
         
         else:  
-            print(f"{fg.GREEN}[*] The download has completed successfully.{fg.RESET}")
+            __print(f"{fg.GREEN}[*] The download has completed successfully.{fg.RESET}")
     
         return
     
@@ -119,7 +126,7 @@ def download_video(**kwargs):
                     df.close()
                     
             except Exception as e:
-                print(f"{fg.RED}[X] An error has occurred while atempting to write the YouTube data to a new file!\n{fg.YELLOW}Remember that filenames cannot contain certain characters!\n{fg.RESET}{e}")
+                __print(f"{fg.RED}[X] An error has occurred while atempting to write the YouTube data to a new file!\n{fg.YELLOW}Remember that filenames cannot contain certain characters!\n{fg.RESET}{e}")
                 
         if audio_only:
             youtubeDownload = video.streams.get_audio_only(audio_subtype)
@@ -139,30 +146,30 @@ def download_video(**kwargs):
             youtubeDownload.download(filename=filename, timeout=int(ytStreams.length / 10) + clamp(extra_timeout, 0, ytStreams.length * 3))
             
         except Exception as e:
-            print(f"{fg.RED}[X] An error has occurred while downloading video #{num}!\n{fg.RESET}{e}")
+            __print(f"{fg.RED}[X] An error has occurred while downloading video #{num}!\n{fg.RESET}{e}")
         
         else:
-            print(f"{fg.GREEN}[*] The download of video #{num} has completed successfully.{fg.RESET}")
+            __print(f"{fg.GREEN}[*] The download of video #{num} has completed successfully.{fg.RESET}")
 
         num += 1
 
-parser.add_argument("url", type=str, help="The link for the video to download.")
-parser.add_argument("-f", "-n", "--filename", type=str, help="A custom filename. If none given, it will be chosen automatically. If downloading a playlist and this argument has been given a value, it will be ignored.", default=None)
-parser.add_argument("-a", "--audio", action="store_true", help="Use this argument to indicate if only the audio should be saved.")
-parser.add_argument("-r", "--resolution", type=str, help="A string (either 'highest' or 'lowest') which will be used when downloading a certain video resolution. Defaults to 'highest'.", default='highest')
-parser.add_argument("--subtype", type=str, help="The subtype for an audio only download. Recommended and default is 'mp4', which means the audio will be extracted from the MP4 version of the video.", default='mp4')
-parser.add_argument("-d", "--savedata", "-s", action="store_true", help="Use this argument to indicate that a file with the data (title, author, description, thumbnail URL) should be saved next to the video.")
-parser.add_argument("-p", "--playlist", "-l", action="store_true", help="Use this argument to indicate that the link refers to a playlist. Right now, this script can't figure it out by itself.")
-parser.add_argument("--timeout", type=int, help="An integer which represents the extra time (alongside the length of the video) the API should wait until it gives up on trying to download the video. Minimum allowed is 0. Maximum allowed is the lenght of the video times 3. Defaults to 5.", default=5)
-
-args: Namespace = parser.parse_args()
-
-download_video(link=args.url,
-    filename=args.filename,
-    audio_only=args.audio,
-    resolution=args.resolution,
-    subtype=args.subtype,
-    save_description=args.savedata,
-    playlist=args.playlist,
-    extra_timeout=args.timeout
-)
+def start_download(link: str, filename: str | None = None, audio_only: bool = False, resolution: Literal["lowest", "highest"] = 'highest', subtype: str = "mp4", save_description: bool = False, playlist: bool = False, extra_timeout: int = 5, autodetect_playlist: Literal["exact", "playlist", "list", "none"] = "exact", disable_output: bool = True):
+    __MATCH = {
+        "exact": "playlist?list=",
+        "list": "list=",
+        "playlist": "playlist?"
+    }
+    
+    if autodetect_playlist != 'none' and __MATCH[autodetect_playlist] in link and not playlist:
+        playlist = True
+    
+    download_video(link=link,
+        filename=filename,
+        audio_only=audio_only,
+        resolution=resolution,
+        subtype=subtype,
+        save_description=save_description,
+        playlist=playlist,
+        extra_timeout=extra_timeout,
+        output=disable_output
+    )
