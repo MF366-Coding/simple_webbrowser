@@ -7,11 +7,13 @@ from typing import Literal, Any
 
 __outputs: bool = True
 
-def __print(*values: object, sep_end: tuple[str, None] = (" ", "\n"), file: Any = None, flush: Literal[False] = False) -> tuple[object] | None:
+
+def autoprint(*values: object, sep_end: tuple[str, None] = (" ", "\n"), file: Any = None, flush: Literal[False] = False) -> tuple[object] | None:
     if __outputs:
         return print(*values, sep=sep_end[0], end=sep_end[1], file=file, flush=flush)
         
     return values
+
 
 def clamp(value, _min, _max):
     if value > _max:
@@ -22,19 +24,21 @@ def clamp(value, _min, _max):
     
     return value
 
+
 def download_video(**kwargs):
     global __outputs
     
-    link: str = kwargs["link"]
-    filename: str | None = kwargs["filename"]
-    audio_only: bool = kwargs["audio_only"]
-    vid_resolution: str = kwargs["resolution"]
-    audio_subtype: str = kwargs["subtype"]
-    sv_desc: bool = kwargs["save_description"]
-    is_playlist: bool = kwargs["playlist"]
-    extra_timeout: int = kwargs["extra_timeout"]
+    link: str = kwargs.get("link")
+    filename: str = kwargs.get("filename", "")
+    audio_only: bool = kwargs.get("audio_only", False)
+    vid_resolution: str = kwargs.get("resolution", 'highest')
+    audio_subtype: str = kwargs.get("subtype", 'mp4')
+    sv_desc: bool = kwargs.get("save_description", False)
+    is_playlist: bool = kwargs.get("playlist", False)
+    extra_timeout: int = kwargs.get("extra_timeout", 0)
+    exception: Exception = kwargs.get('handler', Exception)
     
-    __outputs = kwargs["disable_output"]
+    __outputs = kwargs.get("disable_output", True)
     
     ytStreams: YouTube | Playlist | None = None
     
@@ -70,8 +74,8 @@ def download_video(**kwargs):
                     df.write(f"{str(ytStreams.author)} - {str(ytStreams.title)}\n\nDescription:\n{str(ytStreams.description)}\n\nThumbnail URL:\n{str(ytStreams.thumbnail_url)}")
                     df.close()
                     
-            except Exception as e:
-                __print(f"{fg.RED}[X] An error has occurred while atempting to write the YouTube data to a new file!\n{fg.YELLOW}Remember that filenames cannot contain certain characters!\n{fg.RESET}{e}")
+            except exception as e:
+                autoprint(f"{fg.RED}[X] An error has occurred while attempting to write the YouTube data to a new file!\n{fg.YELLOW}Remember that filenames cannot contain certain characters!\n{fg.RESET}{e}")
         
         if audio_only:
             youtubeDownload = ytStreams.streams.get_audio_only(audio_subtype)
@@ -91,11 +95,11 @@ def download_video(**kwargs):
         try:
             youtubeDownload.download(filename=filename, timeout=int(ytStreams.length / 10) + clamp(extra_timeout, 0, ytStreams.length * 3))
             
-        except Exception as e:
-            __print(f"{fg.RED}[X] An error has occurred!\n{fg.RESET}{e}")
+        except exception as e:
+            autoprint(f"{fg.RED}[X] An error has occurred!\n{fg.RESET}{e}")
         
         else:  
-            __print(f"{fg.GREEN}[*] The download has completed successfully.{fg.RESET}")
+            autoprint(f"{fg.GREEN}[*] The download has completed successfully.{fg.RESET}")
     
         return
     
@@ -125,8 +129,8 @@ def download_video(**kwargs):
                     df.write(f"{str(video.title)} - {str(video.title)}\n\nDescription:\n{str(video.description)}\n\nThumbnail URL:\n{str(video.thumbnail_url)}")
                     df.close()
                     
-            except Exception as e:
-                __print(f"{fg.RED}[X] An error has occurred while atempting to write the YouTube data to a new file!\n{fg.YELLOW}Remember that filenames cannot contain certain characters!\n{fg.RESET}{e}")
+            except exception as e:
+                autoprint(f"{fg.RED}[X] An error has occurred while atempting to write the YouTube data to a new file!\n{fg.YELLOW}Remember that filenames cannot contain certain characters!\n{fg.RESET}{e}")
                 
         if audio_only:
             youtubeDownload = video.streams.get_audio_only(audio_subtype)
@@ -145,15 +149,18 @@ def download_video(**kwargs):
         try:
             youtubeDownload.download(filename=filename, timeout=int(ytStreams.length / 10) + clamp(extra_timeout, 0, ytStreams.length * 3))
             
-        except Exception as e:
-            __print(f"{fg.RED}[X] An error has occurred while downloading video #{num}!\n{fg.RESET}{e}")
+        except exception as e:
+            autoprint(f"{fg.RED}[X] An error has occurred while downloading video #{num}!\n{fg.RESET}{e}")
         
         else:
-            __print(f"{fg.GREEN}[*] The download of video #{num} has completed successfully.{fg.RESET}")
+            autoprint(f"{fg.GREEN}[*] The download of video #{num} has completed successfully.{fg.RESET}")
 
         num += 1
 
-def start_download(link: str, filename: str | None = None, audio_only: bool = False, resolution: Literal["lowest", "highest"] = 'highest', subtype: str = "mp4", save_description: bool = False, playlist: bool = False, extra_timeout: int = 5, autodetect_playlist: Literal["exact", "playlist", "list", "none"] = "exact", disable_output: bool = True):
+
+def start_download(link: str, filename: str | None = None, audio_only: bool = False, resolution: Literal["lowest", "highest"] = 'highest', subtype: str = "mp4", save_description: bool = False, playlist: bool = False, extra_timeout: int = 5, autodetect_playlist: Literal["exact", "playlist", "list", "none"] = "exact", disable_output: bool = True, **kw):
+    exception_handler = kw.get('exception_handler', Exception)
+    
     __MATCH = {
         "exact": "playlist?list=",
         "list": "list=",
@@ -171,5 +178,6 @@ def start_download(link: str, filename: str | None = None, audio_only: bool = Fa
         save_description=save_description,
         playlist=playlist,
         extra_timeout=extra_timeout,
-        output=disable_output
+        output=disable_output,
+        handler=exception_handler
     )
