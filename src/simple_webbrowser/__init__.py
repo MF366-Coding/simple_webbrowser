@@ -51,7 +51,7 @@ class LinkString:
         self._safe: str | Iterable[int] = kwargs.get('safe', '/')
     
     def __repr__(self) -> str:
-        return self.link
+        return self._link
     
     @property
     def encoded_link(self) -> str:
@@ -83,15 +83,18 @@ class LinkBytes:
         return self._link
 
 
-def website(url: str | LinkString | LinkBytes, new: Literal[0, 1, 2] = 0, autoraise: bool = True, link_rule: Literal['normal', 'plus'] = 'normal', browser: webbrowser.BaseBrowser | Any = webbrowser) -> bool:        
+def website(url: str | LinkString,
+            new: Literal[0, 1, 2] = 0,
+            autoraise: bool = True,
+            browser: webbrowser.BaseBrowser | Any = webbrowser,
+            **_) -> bool:
     """
     website opens a website using webbrowser
 
     Args:
-        url (str | LinkString | LinkBytes): a representation of an URL. If it's a LinkString or a LinkBytes, the encoded version of it will be considered the URL.
+        url (str | LinkString): a representation of an URL. If it's a LinkString, the original version of it will be considered the URL.
         new (Literal[0, 1, 2], optional): whether to use the current browser (default), a new window or a new browser page. Defaults to 0.
         autoraise (bool, optional): whether to focus the browser or not. Defaults to True.
-        link_rule (Literal[NORMAL, PLUS], optional): if using a LinkString as url and this is set to 'plus', use encoded_link_plus instead of encoded_link. When set to 'normal' or anything else really, use encoded_link. This argument is compatible with the NORMAL and PLUS constants. Defaults to 'normal'.
         browser (webbrowser.BaseBrowser | webbrowser, optional): the browser class or module that will open the URL. Defaults to the webbrowser module (a.k.a.: webbrowser will use the default browser).
     
     Returns:
@@ -101,19 +104,14 @@ def website(url: str | LinkString | LinkBytes, new: Literal[0, 1, 2] = 0, autora
     link = url
     
     if isinstance(url, LinkString):
-        if link_rule == 'plus':
-            link = url.encoded_link_plus
-            
-        else:
-            link = url.encoded_link
-            
-    elif isinstance(url, LinkBytes):
-        link = url.encoded_link
+        link = url.link
 
     return browser.open(link, new, autoraise)
 
 
-def build_search_url(common: str, query: str | LinkString | LinkBytes, link_rule: Literal['normal', 'plus'] = 'normal') -> str:
+def build_search_url(common: str,
+                     query: str | LinkString | LinkBytes,
+                     link_rule: Literal['normal', 'plus'] = 'normal') -> str:
     """
     build_search_url combines the common part of the URL and the parsed query into a search URL
 
@@ -143,11 +141,13 @@ def build_search_url(common: str, query: str | LinkString | LinkBytes, link_rule
     return f"{common}{parsed_query}"
 
 
+# [*] Variables for scripts that used the old variable names
 Website = website
 BuildSearchURL = build_search_url
 get_browser_class = webbrowser.get
 register_connector = webbrowser.register
 
+# [*] Search engines
 Google = lambda query: website(build_search_url(GOOGLE_COMMON, parser.quote(query, 'utf-8')))
 Bing = lambda query: website(build_search_url(BING_COMMON, parser.quote(query, 'utf-8')))
 Brave = lambda query: website(build_search_url(BRAVE_COMMON, parser.quote(query, 'utf-8')))
@@ -162,13 +162,13 @@ Qwant = lambda query: website(build_search_url(QWANT_COMMON, parser.quote(query,
 SpotifyOnline = lambda query: website(build_search_url(SPOTIFY_COMMON, parser.quote(query, 'utf-8')))
 GitLab = lambda query: website(build_search_url(GITLAB_COMMON, parser.quote(query, 'utf-8')))
 GitHub = lambda query: website(build_search_url(GITHUB_COMMON, parser.quote(query, 'utf-8')))
-
 OpenSpotify = SpotifyOnline
 
 
 class ExtraEngines:
     def __init__(self, browser = webbrowser) -> None:
         self._browser = browser
+        
         self.DoomWorld = lambda query: website(build_search_url(DOOMWORLD_COMMON, parser.quote(query, 'utf-8')), browser=self._browser)
         self.Twitch = lambda query: website(build_search_url(TWITCH_COMMON, parser.quote(query, 'utf-8')), browser=self._browser)
 
@@ -178,5 +178,6 @@ class ExtraEngines:
     @property
     def browser(self):
         return self._browser
-    
+
+
 extras = ExtraEngines()

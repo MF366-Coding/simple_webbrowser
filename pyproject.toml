@@ -4,13 +4,13 @@ build-backend = "hatchling.build"
 
 [project]
 name = "simple_webbrowser"
-version = "0.2.1"
+version = "0.2.2"
 authors = [
   { name="MF366", email="real_mf366@yahoo.com" },
 ]
-description = "A better webbrowser. A WAAAY more simple webbrowser. Just. For. You."
+description = "Need something simple? Need a webbrowser? This is simple_webbrowser."
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
